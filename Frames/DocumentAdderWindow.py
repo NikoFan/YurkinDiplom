@@ -43,6 +43,32 @@ class DocumentAdderClass(QFrame):
         self.frame_layout.setSpacing(0)
         # Удаление отступов от краев приложения
         self.frame_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Создание стилей для кнопки Удалить
+        # Стиль для отключенной кнопки
+        self.del_btn_style_disable = """
+        QPushButton {
+        background: gray;
+        color: white;
+        font-size: 16px;
+        }
+        """
+        # Стиль для включенной кнопки
+        self.del_btn_style_enable = """
+        QPushButton {
+        background: #972b2b;
+        color: white;
+        font-size: 16px;
+        }
+
+        QPushButton:hover{
+        background: #972b2b;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        }
+                        """
+
         # Запуск генерации интерфейса
         self.setup_ui()
 
@@ -120,16 +146,17 @@ class DocumentAdderClass(QFrame):
         # ---- Заменить на метод библиотеки os для получения пути. Ввод через "" ненадежен
         try:
             # Для линукса
-            path = os.popen("pwd").read()[:-1]
+            self.path = os.popen("pwd").read()[:-1]
         except Exception:
             # Для Win
-            path = os.popen("echo %cd%").read()[:-1]
+            self.path = os.popen("echo %cd%").read()[:-1]
 
         # Создание области для файлов
         try:
             # Перебор текущей ветки в разделе "Файлы"
             for icon_element in self.current_JSON_brunch["Файлы"]:
-                print(f"{path}/Icons/" + self.current_JSON_brunch["Файлы"][icon_element]["Иконка"])
+                is_file_exist: bool = False
+                print(f"{self.path}/Icons/" + self.current_JSON_brunch["Файлы"][icon_element]["Иконка"])
                 # Виджет для документа и кнопок
                 doc_widget = QWidget()
                 # Горизонтальная разметка для картинки и блока кнопок
@@ -137,7 +164,7 @@ class DocumentAdderClass(QFrame):
                 # Добавление в горизонтальную разметку Иконки
                 doc_widget_hbox.addWidget(
                     self.create_document_icon(
-                        f"{path}/Icons/" + self.current_JSON_brunch["Файлы"][icon_element]["Иконка"]))
+                        f"{self.path}/Icons/" + self.current_JSON_brunch["Файлы"][icon_element]["Иконка"]))
 
                 # Виджет для блока кнопок
                 vertical_buttons_block_widget = QWidget()
@@ -161,7 +188,7 @@ class DocumentAdderClass(QFrame):
                 )
 
                 # Создание кнопки для загрузки файла
-                upload_file_btn = QPushButton("Загрузить файл")
+                upload_file_btn = QPushButton("Добавить файл")
                 upload_file_btn.setObjectName("upload_btn")
                 upload_file_btn.setFixedHeight(30)
                 upload_file_btn.setAccessibleName(self.current_JSON_brunch["Файлы"][icon_element]["path"])
@@ -169,35 +196,63 @@ class DocumentAdderClass(QFrame):
                     self.upload_file  # Действие кнопки
                 )
 
+                # Создание виджета для хранения добавленного файла
+                upload_file_widget = QWidget()
+                upload_file_widget_layout = QHBoxLayout(upload_file_widget)
+
+                # Добавление в разметку
+                # Проверка, был ли файл добавлен ранее
+                if len(FilesContainer.get_element(self.current_JSON_brunch["Файлы"][icon_element]["path"])) != 0:
+                    # Создание Разметки для фотки
+                    new_document_icon = QVBoxLayout()
+                    new_document_icon.addWidget(self.create_document_icon(
+                        self.create_current_icon_name(
+                            FilesContainer.get_element(self.current_JSON_brunch["Файлы"][icon_element]["path"])
+                        ), 52, 52
+                    ))
+                    new_document_icon.setObjectName(self.current_JSON_brunch["Файлы"][icon_element]["path"] + "_layout")
+
+                    # Создание лейбла для названия
+                    new_document_name = QLabel(
+                        FilesContainer.get_element(self.current_JSON_brunch["Файлы"][icon_element]["path"]))
+                    new_document_name.setObjectName(self.current_JSON_brunch["Файлы"][icon_element]["path"] + "_label")
+
+                    # Файл был добавлен
+                    is_file_exist = True
+
+                else:
+                    # Создание Разметки для фотки
+                    new_document_icon = QVBoxLayout()
+                    new_document_icon.setObjectName(self.current_JSON_brunch["Файлы"][icon_element]["path"] + "_layout")
+
+                    # Создание лейбла для названия
+                    new_document_name = QLabel("Нет документа")
+                    new_document_name.setObjectName(self.current_JSON_brunch["Файлы"][icon_element]["path"] + "_label")
+
+                upload_file_widget_layout.addLayout(new_document_icon)
+                upload_file_widget_layout.addWidget(new_document_name, stretch=10)
+                # Добавление кнопок в разметку блока кнопок
+                vertical_buttons_block_layout.addWidget(install_btn)
+                vertical_buttons_block_layout.addWidget(upload_file_btn)
+
+                # Добавление области с добавленным файлом в разметку блока кнопок
+                vertical_buttons_block_layout.addWidget(upload_file_widget)
+
                 # Создание кнопки для удаления загруженного файла
                 del_file_btn = QPushButton("Удалить файл")
                 del_file_btn.setObjectName(self.current_JSON_brunch["Файлы"][icon_element]["path"])
                 # Установка стиля, т.к. через objectName это сделать нельзя
-                del_btn_style = """
-QPushButton {
-background: #972b2b;
-color: white;
-font-size: 16px;
-}
-
-QPushButton:hover{
-background: #972b2b;
-color: white;
-font-size: 20px;
-font-weight: bold;
-}
-                """
-                del_file_btn.setStyleSheet(del_btn_style)
+                if is_file_exist:
+                    del_file_btn.setStyleSheet(self.del_btn_style_enable)
+                else:
+                    del_file_btn.setStyleSheet(self.del_btn_style_disable)
                 del_file_btn.setFixedHeight(30)
                 del_file_btn.clicked.connect(
                     self.del_file  # Действие кнопки
                 )
                 # Установка НЕАКТИВНА при создании
-                del_file_btn.setEnabled(False)
+                del_file_btn.setEnabled(is_file_exist)
 
-                # Добавление кнопок в разметку блока кнопок
-                vertical_buttons_block_layout.addWidget(install_btn)
-                vertical_buttons_block_layout.addWidget(upload_file_btn)
                 vertical_buttons_block_layout.addWidget(del_file_btn)
 
                 # Добавления блока кнопок в разметку блока документа
@@ -218,6 +273,18 @@ font-weight: bold;
         doc_scroll.setWidget(right_side_widget)
         # Установка области прокрутки в окно
         self.frame_layout.addWidget(doc_scroll)
+
+    def create_current_icon_name(self, file_name):
+        """
+        Функция генерации правильного имени для иконки, которую будет использовать файл
+        :return: Ничего
+        """
+        if file_name.split(".")[-1] not in ["pdf", "docx", "doc"]:
+            file_ico = self.path + "/Icons/wrong_icon.png"
+        else:
+            file_ico = self.path + "/Icons/" + file_name.split(".")[-1] + "_icon.png"
+
+        return file_ico
 
     def upload_file(self):
         """
@@ -242,26 +309,53 @@ font-weight: bold;
             shutil.copy2(file_name, f"./File_Container/{replace_file_name}")
             # Запись файла в стек с файлами
             FilesContainer.push(key, value=replace_file_name)
+            file_ico = self.create_current_icon_name(replace_file_name)
+
+            new_document_icon = self.findChild(QObject, key + "_layout")
+
+            # Очистка Layout с фоткой добавленного файла, от старой фотки
+            for i in range(new_document_icon.count()):
+                child = new_document_icon.itemAt(i).widget()
+                child.deleteLater()
+
+            # Установка новой фотки
+            new_document_icon.addWidget(self.create_document_icon(file_ico, 52, 52))
+
+            # Смена названия файла
+            file_name_child = self.findChild(QObject, key + "_label")
+            file_name_child.setText(replace_file_name)
 
             # Определение кнопки "Удалить", которая принадлежит файлу
             del_btn = self.findChild(QObject, key)
             # Разрешение на использование
             del_btn.setEnabled(True)
+            del_btn.setStyleSheet(self.del_btn_style_enable)
 
     def del_file(self):
         """
         Функция удаления файла в приложение
         :return: Ничего
         """
-
         # Определение ключа, который будет удален из стека
         key = self.sender().objectName()
+
+        # Очистка Layout с фоткой добавленного файла, от старой фотки
+        new_document_icon = self.findChild(QObject, key + "_layout")
+        for i in range(new_document_icon.count()):
+            child = new_document_icon.itemAt(i).widget()
+            child.deleteLater()
+
+        # Смена названия файла
+        file_name_child = self.findChild(QObject, key + "_label")
+        file_name_child.setText("Нет документа")
+
         # Удаление файла из папки
         os.remove(f"./File_Container/{FilesContainer.get_element(key)}")
         # Удаление элемента словаря
         FilesContainer.del_element(key)
         # Запрет на использование
         self.sender().setEnabled(False)
+        self.sender().setStyleSheet(self.del_btn_style_disable)
 
     def install_file(self):
         """
@@ -336,10 +430,12 @@ font-weight: bold;
             self.controller.switch_frames(DocumentAdderClass, "--change--")
         elif num_of_step - 1 <= 0:
             # Переход на окно выбора документов
-            ActionStack.pop()
-            self.controller.switch_frames(ChooseTypeOfPatent.ChooseTypeOfPatent)
+            if send_W_message(
+                    "Вы точно хотите вернуться к выбору документа? Все загруженные документы будут удалены!") < 20_000:
+                ActionStack.pop()
+                self.controller.switch_frames(ChooseTypeOfPatent.ChooseTypeOfPatent)
 
-    def create_document_icon(self, path: str):
+    def create_document_icon(self, path: str, w: int = 104, h: int = 104):
         """
         Паттерн по созданию иконки документа
         :param path: Путь к иконке на локальной машине
@@ -347,7 +443,7 @@ font-weight: bold;
         """
         icon_socket = QLabel()
         icon = QPixmap(path)
-        icon_socket.setFixedSize(104, 104)
+        icon_socket.setFixedSize(w, h)
         icon_socket.setScaledContents(True)
         icon_socket.setPixmap(icon)
 

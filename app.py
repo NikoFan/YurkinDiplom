@@ -9,6 +9,7 @@ from PySide6.QtCore import QSize
 
 from ReaderJSON import Reader
 from Storage.UsersAction import ActionStack
+from SendMessageBox import send_W_message
 
 import sys
 from Frames.Start_frame import MainWindow  # Исправленный импорт
@@ -19,7 +20,7 @@ class MainApplicationClass(QMainWindow):
         super().__init__()
         self.setWindowTitle("Мастер Подачи Документов")
         self.resize(900, 600)
-        self.setMinimumSize(600, 550)
+        self.setMinimumSize(700, 550)
         # Чтение JSON файла с данными
         Reader.set_documents()
 
@@ -44,11 +45,42 @@ class MainApplicationClass(QMainWindow):
         self.frames_container.addWidget(current_frame)
         self.frames_container.setCurrentWidget(current_frame)
 
+    def closeEvent(self, event):
+        """
+        Функция контролирует закрытие приложения. Это системная встроенная функция
+        :param event: Закрытие окна
+        :return: Ничего
+        """
+        if send_W_message("вы точно хотите выйти из приложения?") < 20_000:
+            event.accept()
+        else:
+            event.ignore()
+
+
+
 
 # Стили для приложения
 styles_sheet = '''
 QWidget {
     background-color: white;
+}
+
+QMessageBox QLabel {
+color: black;
+background: white;
+}
+
+QMessageBox QPushButton {
+color: black;
+background: white;
+}
+
+QMessageBox {
+background: white;
+}
+
+QMessageBox QIcon {
+background: white;
 }
 
 QLabel {
@@ -90,10 +122,18 @@ font-weight: bold;
 }
 
 #back_btn {
-color: #FFFFFF;
+color: white;
+font-size: 25px;
+border: None;
+background: black;
+margin: 20px;
+}
+
+#back_btn:hover {
+color: white;
 font-size: 30px;
 border: None;
-background: #000000;
+background: black;
 font-weight: bold;
 margin: 20px;
 }

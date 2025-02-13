@@ -19,7 +19,11 @@ class FilesContainer:
         :param key: Ключ
         :return: Значение словаря
         """
-        return FilesContainer.files_container[key]
+        print(FilesContainer.files_container)
+        try:
+            return FilesContainer.files_container[key]
+        except Exception:
+            return {}
 
 
     @staticmethod
