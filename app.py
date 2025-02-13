@@ -62,11 +62,8 @@ border: none;
 #instruction_text {
 color: black;
 qproperty-alignment: AlignTop;
-font-size: 14px;
+font-size: 16px;
 }
-
-
-
 
 #circle_label {
 background-color: #2E86C1;
@@ -142,9 +139,6 @@ color: white;
 font-size: 20px;
 font-weight: bold;
 }
-
-
-
 
 #install_doc_btn {
 background: #000000;
