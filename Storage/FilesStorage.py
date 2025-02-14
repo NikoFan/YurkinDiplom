@@ -25,6 +25,10 @@ class FilesContainer:
         except Exception:
             return {}
 
+    @staticmethod
+    def get_full_stack():
+        return FilesContainer.files_container
+
 
     @staticmethod
     def clear_container():
@@ -33,6 +37,15 @@ class FilesContainer:
         :return: Ничего
         """
         FilesContainer.files_container = dict()
+
+
+    @staticmethod
+    def get_stack_len():
+        """
+        Функция получения количества подгруженных файлов
+        :return: None
+        """
+        return len(FilesContainer.files_container)
 
 
     @staticmethod

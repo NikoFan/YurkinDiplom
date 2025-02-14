@@ -81,9 +81,10 @@ class InfoPatent(QFrame):
         content_layout.addWidget(title)
 
         # Добавляем текстовое поле
-        text_edit = QTextEdit(self.use_info)
-        text_edit.setReadOnly(True)
-        content_layout.addWidget(text_edit)
+        text_information = QTextEdit(self.use_info)
+        text_information.setObjectName("text_information")
+        text_information.setReadOnly(True)
+        content_layout.addWidget(text_information)
 
         self.frame_layout.addWidget(information_scroll)
 

@@ -7,7 +7,7 @@ from PySide6.QtGui import QPixmap
 
 import requests
 import urllib.parse
-from Frames import ChooseTypeOfPatent
+from Frames import ChooseTypeOfPatent, ZipFrame
 from ReaderJSON import Reader
 from Storage.UsersAction import ActionStack
 import os, shutil  # Для получения пути к программе
@@ -133,6 +133,7 @@ class DocumentAdderClass(QFrame):
                 link_href = self.current_JSON_brunch["Ссылки"][link]["url"]  # Определение ссылки
                 text = self.current_JSON_brunch["Ссылки"][link]["Текст"]  # Определение текста
                 link_text = QLabel(f'''<a href='{link_href}'>{text}</a>''')  # Добавление ссылки в текст
+                link_text.setObjectName("link_text")
                 link_text.setWordWrap(True)
                 link_text.setOpenExternalLinks(True)  # Разрешение на выход в интернет
 
@@ -175,23 +176,15 @@ class DocumentAdderClass(QFrame):
                 # Определение названия документа
                 document_name = QLabel(self.current_JSON_brunch["Файлы"][icon_element]["Название"])
                 document_name.setMinimumWidth(200)
+                document_name.setObjectName("document_name")
                 document_name.setWordWrap(True)
                 vertical_buttons_block_layout.addWidget(document_name)
-
-                # Создание кнопки для Скачивания файла
-                install_btn = QPushButton("Скачать")
-                install_btn.setObjectName("install_doc_btn")
-                install_btn.setAccessibleName(self.current_JSON_brunch["Файлы"][icon_element]["path"])
-                install_btn.setFixedHeight(30)
-                install_btn.clicked.connect(
-                    self.install_file  # Действие кнопки
-                )
 
                 # Создание кнопки для загрузки файла
                 upload_file_btn = QPushButton("Добавить файл")
                 upload_file_btn.setObjectName("upload_btn")
                 upload_file_btn.setFixedHeight(30)
-                upload_file_btn.setAccessibleName(self.current_JSON_brunch["Файлы"][icon_element]["path"])
+                upload_file_btn.setAccessibleName(self.current_JSON_brunch["Файлы"][icon_element]["Название"])
                 upload_file_btn.clicked.connect(
                     self.upload_file  # Действие кнопки
                 )
@@ -202,20 +195,23 @@ class DocumentAdderClass(QFrame):
 
                 # Добавление в разметку
                 # Проверка, был ли файл добавлен ранее
-                if len(FilesContainer.get_element(self.current_JSON_brunch["Файлы"][icon_element]["path"])) != 0:
+                if len(FilesContainer.get_element(self.current_JSON_brunch["Файлы"][icon_element]["Название"])) != 0:
                     # Создание Разметки для фотки
                     new_document_icon = QVBoxLayout()
                     new_document_icon.addWidget(self.create_document_icon(
                         self.create_current_icon_name(
-                            FilesContainer.get_element(self.current_JSON_brunch["Файлы"][icon_element]["path"])
+                            FilesContainer.get_element(self.current_JSON_brunch["Файлы"][icon_element]["Название"])
                         ), 52, 52
                     ))
-                    new_document_icon.setObjectName(self.current_JSON_brunch["Файлы"][icon_element]["path"] + "_layout")
+                    new_document_icon.setObjectName(
+                        self.current_JSON_brunch["Файлы"][icon_element]["Название"] + "_layout")
 
                     # Создание лейбла для названия
                     new_document_name = QLabel(
-                        FilesContainer.get_element(self.current_JSON_brunch["Файлы"][icon_element]["path"]))
-                    new_document_name.setObjectName(self.current_JSON_brunch["Файлы"][icon_element]["path"] + "_label")
+                        FilesContainer.get_element(self.current_JSON_brunch["Файлы"][icon_element]["Название"]))
+                    new_document_name.setWordWrap(True)
+                    new_document_name.setObjectName(
+                        self.current_JSON_brunch["Файлы"][icon_element]["Название"] + "_label")
 
                     # Файл был добавлен
                     is_file_exist = True
@@ -223,16 +219,30 @@ class DocumentAdderClass(QFrame):
                 else:
                     # Создание Разметки для фотки
                     new_document_icon = QVBoxLayout()
-                    new_document_icon.setObjectName(self.current_JSON_brunch["Файлы"][icon_element]["path"] + "_layout")
+                    new_document_icon.setObjectName(
+                        self.current_JSON_brunch["Файлы"][icon_element]["Название"] + "_layout")
 
                     # Создание лейбла для названия
                     new_document_name = QLabel("Нет документа")
-                    new_document_name.setObjectName(self.current_JSON_brunch["Файлы"][icon_element]["path"] + "_label")
+                    new_document_name.setWordWrap(True)
+                    new_document_name.setObjectName(
+                        self.current_JSON_brunch["Файлы"][icon_element]["Название"] + "_label")
 
                 upload_file_widget_layout.addLayout(new_document_icon)
                 upload_file_widget_layout.addWidget(new_document_name, stretch=10)
-                # Добавление кнопок в разметку блока кнопок
-                vertical_buttons_block_layout.addWidget(install_btn)
+
+                if self.current_JSON_brunch["Файлы"][icon_element]["path"] != "None":
+                    # Создание кнопки для Скачивания файла
+                    install_btn = QPushButton("Скачать")
+                    install_btn.setObjectName("install_doc_btn")
+                    install_btn.setAccessibleName(self.current_JSON_brunch["Файлы"][icon_element]["Название"])
+                    install_btn.setFixedHeight(30)
+                    install_btn.clicked.connect(
+                        self.install_file  # Действие кнопки
+                    )
+                    # Добавление кнопок в разметку блока кнопок
+                    vertical_buttons_block_layout.addWidget(install_btn)
+
                 vertical_buttons_block_layout.addWidget(upload_file_btn)
 
                 # Добавление области с добавленным файлом в разметку блока кнопок
@@ -240,7 +250,7 @@ class DocumentAdderClass(QFrame):
 
                 # Создание кнопки для удаления загруженного файла
                 del_file_btn = QPushButton("Удалить файл")
-                del_file_btn.setObjectName(self.current_JSON_brunch["Файлы"][icon_element]["path"])
+                del_file_btn.setObjectName(self.current_JSON_brunch["Файлы"][icon_element]["Название"])
                 # Установка стиля, т.к. через objectName это сделать нельзя
                 if is_file_exist:
                     del_file_btn.setStyleSheet(self.del_btn_style_enable)
@@ -295,7 +305,7 @@ class DocumentAdderClass(QFrame):
         file_name, _ = QFileDialog.getOpenFileName()
         # Проверка, что пользователь выбрал файл, а не закрыл окно
         if len(file_name) > 0:
-            # Получение ключа для хранения файла  в стеке
+            # Получение ключа для хранения файла в стеке
             key = self.sender().accessibleName()
 
             # Получение ИМЕНИ файла, а не всего пути
@@ -401,11 +411,15 @@ class DocumentAdderClass(QFrame):
 
         # Получение максимального количества шагов для операции
         current_len = len(self.documents[self.full_stack[0]][
-                              self.full_stack[1]]) - 1  # -> Информация тоже попадает в список, ее удаляем
+                              self.full_stack[1]]) - 2  # -> Информация тоже попадает в список, ее удаляем
 
         if num_of_step + 1 > current_len:
             # Переход на Последнее окно -> Создание архива
-            ...
+            num_of_step += 1  # -> num_of_step = 2
+            next_step = f"{last_step[0]} {num_of_step}"
+            ActionStack.change_step(next_step)
+            self.controller.switch_frames(ZipFrame.ZipClass, "--change--")
+
         elif (num_of_step + 1) in range(2, current_len + 1):
             num_of_step += 1  # -> num_of_step = 2
             next_step = f"{last_step[0]} {num_of_step}"
@@ -442,6 +456,7 @@ class DocumentAdderClass(QFrame):
         :return: QLabel() -> В котором лежит иконка 104х104
         """
         icon_socket = QLabel()
+        icon_socket.setObjectName("icon_socket")
         icon = QPixmap(path)
         icon_socket.setFixedSize(w, h)
         icon_socket.setScaledContents(True)

@@ -91,10 +91,15 @@ QPushButton {
 border: none;
 }
 
+#text_information {
+color: black;
+font-size: 20px;
+}
+
 #instruction_text {
 color: black;
 qproperty-alignment: AlignTop;
-font-size: 16px;
+font-size: 18px;
 }
 
 #circle_label {
@@ -129,6 +134,27 @@ background: black;
 margin: 20px;
 }
 
+#file_name {
+color: black;
+font-size: 20px;
+background: none;
+}
+
+#icon_socket{
+background: none;
+}
+
+#link_text {
+font-style: italic;
+font-size: 18px;
+background: none;
+qproperty-alignment: AlignRight;
+}
+
+#files_widget {
+background: #f0f0f0;
+}
+
 #back_btn:hover {
 color: white;
 font-size: 30px;
@@ -144,6 +170,13 @@ border: none;
 padding: 15px;
 font-size: 20px;
 line-height: 1.5;
+}
+
+#document_name {
+color: #000000;
+font-size: 20px;
+font-style: italic;
+background: none;
 }
 
 #title {
