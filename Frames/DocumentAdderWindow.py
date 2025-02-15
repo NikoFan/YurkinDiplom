@@ -145,12 +145,14 @@ class DocumentAdderClass(QFrame):
         # Выгрузка примеров документов
         # Получение пути к проекту на компе пользователя
         # ---- Заменить на метод библиотеки os для получения пути. Ввод через "" ненадежен
-        try:
-            # Для линукса
-            self.path = os.popen("pwd").read()[:-1]
-        except Exception:
-            # Для Win
-            self.path = os.popen("echo %cd%").read()[:-1]
+        # try:
+        #     # Для линукса
+        #     self.path = os.popen("pwd").read()[:-1]
+        # except Exception:
+        #     # Для Win
+        #     self.path = os.popen("echo %cd%").read()[:-1]
+
+        self.path = os.path.dirname(os.path.realpath(u"~\Icons\wrong_icon.png"))
 
         # Создание области для файлов
         try:

@@ -108,12 +108,14 @@ class ZipClass(QFrame):
         scroll_area_files_container = QWidget()
         # Разметка контейнера
         scroll_area_files_container_layout = QVBoxLayout(scroll_area_files_container)
-        try:
-            # Для линукса
-            self.path = os.popen("pwd").read()[:-1]
-        except Exception:
-            # Для Win
-            self.path = os.popen("echo %cd%").read()[:-1]
+        # try:
+        #     # Для линукса
+        #     self.path = os.popen("pwd").read()[:-1]
+        # except Exception:
+        #     # Для Win
+        #     self.path = os.popen("echo %cd%").read()[:-1]
+
+        self.path = os.path.dirname(os.path.realpath(u"~\Icons\wrong_icon.png"))
         for file_key, file_value in FilesContainer.get_full_stack().items():
             files_widget = QWidget()
             files_widget.setObjectName("files_widget")
